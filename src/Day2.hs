@@ -2,6 +2,7 @@ module Day2
     ( solve
     ) where
 
+import Control.Applicative
 import Text.ParserCombinators.ReadP
 
 input :: String -> IO [String]
@@ -11,19 +12,32 @@ input fileName = do
 
 solve :: IO ()
 solve = do
-    solution <- fmap parse (input "data/day2_small.txt")
-    print $ solution
+    parsed <- fmap parse (input "data/day2_input.txt")
+    -- print $ parsed
+    pos <- return (run parsed)
+    print pos
+    print (fst pos * snd pos)
 
-parse :: [String] -> [(String, Int)]
+
+run :: [Command] -> (Horizontal, Depth)
+run cmds = foldl (runCmd) (0, 0) cmds
+
+type Horizontal = Int
+type Depth = Int
+
+runCmd :: (Horizontal, Depth) -> Command -> (Horizontal, Depth)
+runCmd (h, d) (Forward x) = (h + x, d)
+runCmd (h, d) (Up x)      = (h, d - x)
+runCmd (h, d) (Down x)    = (h, d + x)
+
+parse :: [String] -> [Command]
 parse x = map (fst . head) $ map (readP_to_S commandParser) x
 
 
-commandParser :: ReadP (String, Int)
+commandParser :: ReadP Command
 commandParser = do
-    cmd <- many1 character
-    string " "
-    units <- number
-    return (cmd, units)
+    cmd <- forward <|> up <|> down
+    return cmd
   
 digit :: ReadP Char
 digit = satisfy (\char -> char >= '0' && char <= '9')
@@ -34,7 +48,25 @@ number = fmap read (many1 digit)
 character :: ReadP Char
 character = satisfy (\char -> char >= 'a' && char <= 'z')
 
-data Command = Forward Int | Down Int | Up Int
+forward :: ReadP Command
+forward = do
+    string "forward "
+    units <- number
+    return $ Forward units
+
+down :: ReadP Command
+down = do
+    string "down "
+    units <- number
+    return $ Down units
+
+up :: ReadP Command
+up = do
+    string "up "
+    units <- number
+    return $ Up units
+
+data Command = Forward Int | Down Int | Up Int deriving (Show)
 
 {-
  - solve = do
