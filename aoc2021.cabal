@@ -34,8 +34,8 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
-    , control
+      array
+    , base >=4.7 && <5
     , text
   default-language: Haskell2010
 
@@ -48,8 +48,8 @@ executable aoc2021-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aoc2021
+    , array
     , base >=4.7 && <5
-    , control
     , text
   default-language: Haskell2010
 
@@ -63,7 +63,7 @@ test-suite aoc2021-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       aoc2021
+    , array
     , base >=4.7 && <5
-    , control
     , text
   default-language: Haskell2010
