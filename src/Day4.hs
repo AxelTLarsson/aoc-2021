@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
 module Day4
-    ( solve
+    ( solve, bingo, unmarkedSum
     ) where
 
 import Control.Applicative
@@ -9,6 +9,7 @@ import Text.ParserCombinators.ReadP
 import qualified Data.Text as T
 import Data.Text (Text)
 import Data.Text.IO as IO
+import Data.Text.Read as Read
 import Data.List (foldl', intersperse)
 import Data.Array
 
@@ -18,10 +19,33 @@ input fileName = do
 
 solve :: IO ()
 solve = do
-    inp <- (input "data/day4_small.txt")
-    print $ drawnNumbers inp
-    b0 <- return ( head $ boards inp)
-    print b0
+    inp <- (input "data/day4_input.txt")
+    numbers <- return $ drawnNumbers inp
+    bs <- return $ boards inp
+    winner <- return (play bs [] numbers)
+    print $ winner
+    print $ score ((head .fst) winner) (snd winner)
+
+
+play :: [Board] -> [Text] -> [Text] -> ([Board], [Text])
+play bs drawn [] = (bs, drawn)
+play bs drawn leftToDraw =
+    let
+        bingos = map (bingo $ drawn) bs
+        winningBs = filter (bingo $ drawn) bs
+    in
+    if any id bingos then
+                     play winningBs drawn []
+                     else
+                     play bs (drawn ++ [head leftToDraw]) ( tail leftToDraw )
+
+score :: Board -> [Text] -> Int
+score board drawn =
+    let
+        lastDrawn = read $ T.unpack $ last drawn
+        unmarkedS = unmarkedSum board drawn
+     in
+     lastDrawn  * unmarkedS
 
 drawnNumbers :: Text -> [Text]
 drawnNumbers inp = ( (T.splitOn ",")  . head . T.lines) inp
@@ -35,18 +59,34 @@ board :: Text -> Board
 board b =
     let
         ls = T.lines b
-        numbers = map (listArray (0, length ls - 1) . (filter ((/=) "") . (T.splitOn " ") . T.strip)) ls
-        numbersA = listArray (0, length ls - 1) numbers
-        drawn = array (0, length ls - 1) [ (j, array (0, length ls - 1) [ (i, False) | i <- [0 .. length ls - 1]]) | j <- [ 0..length ls - 1]]
+        rows = map (filter ((/=) "") . (T.splitOn " ") . T.strip) ls
+        cols = transpose rows
     in
-    Board numbersA drawn
+     Board rows cols
+
+transpose :: [[Text]] -> [[Text]]
+transpose ([]:_) = []
+transpose xs = (map head xs) : transpose (map tail xs)
+
+
+bingo :: [Text] -> Board -> Bool
+bingo drawn board@(Board rows cols) =
+    let
+        rowBingo row = all (\n -> elem n drawn) row
+    in
+        any rowBingo rows || any rowBingo cols
+
+unmarkedSum :: Board -> [Text] -> Int
+unmarkedSum board@(Board rows cols) drawn =
+    let
+        unmarked = map (read . T.unpack) $ filter (\x -> not (elem x drawn)) $ concat rows
+     in
+     sum unmarked
+
 
 
 data Board = Board {
-    numbers :: Array Int (Array Int Text),
-    drawn :: Array Int (Array Int Bool)
+    rows :: [[Text]],
+    cols :: [[Text]]
 } deriving (Show)
 
-markNumber :: Board -> Text -> Board
-markNumber board@(Board numbers drawn) num =
-    board
