@@ -23,8 +23,13 @@ solve = do
     numbers <- return $ drawnNumbers inp
     bs <- return $ boards inp
     winner <- return (play bs [] numbers)
+    print $ "Winner"
     print $ winner
     print $ score ((head .fst) winner) (snd winner)
+    print $ "Loser"
+    loser <- return (playToLose bs [] numbers)
+    print $ loser
+    print $ score ((head .fst) loser) (snd loser)
 
 
 play :: [Board] -> [Text] -> [Text] -> ([Board], [Text])
@@ -38,6 +43,19 @@ play bs drawn leftToDraw =
                      play winningBs drawn []
                      else
                      play bs (drawn ++ [head leftToDraw]) ( tail leftToDraw )
+
+
+playToLose :: [Board] -> [Text] -> [Text] -> ([Board], [Text])
+playToLose bs drawn [] = (bs, drawn)
+playToLose bs drawn leftToDraw =
+    let
+        bingos = map (bingo $ drawn) bs
+        losingbs = filter (\b -> not (bingo drawn b)) bs
+    in
+    if any id bingos && length bs == 1 then
+                     playToLose bs drawn []
+                     else
+                     playToLose losingbs (drawn ++ [head leftToDraw]) ( tail leftToDraw )
 
 score :: Board -> [Text] -> Int
 score board drawn =
