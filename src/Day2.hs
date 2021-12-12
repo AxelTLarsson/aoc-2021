@@ -2,8 +2,8 @@ module Day2
     ( solve
     ) where
 
-import Control.Applicative
-import Text.ParserCombinators.ReadP
+import           Control.Applicative
+import           Text.ParserCombinators.ReadP
 
 input :: String -> IO [String]
 input fileName = do
@@ -49,7 +49,7 @@ commandParser :: ReadP Command
 commandParser = do
     cmd <- forward <|> up <|> down
     return cmd
-  
+
 digit :: ReadP Char
 digit = satisfy (\char -> char >= '0' && char <= '9')
 

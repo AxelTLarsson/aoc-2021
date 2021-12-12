@@ -4,12 +4,12 @@ module Day3
     ( solve, bintodec, solve2
     ) where
 
-import Control.Applicative
-import Text.ParserCombinators.ReadP
-import qualified Data.Text as T
-import Data.Text (Text)
-import Data.Text.IO as IO
-import Data.List (foldl', intersperse)
+import           Control.Applicative
+import           Data.List                    (foldl', intersperse)
+import           Data.Text                    (Text)
+import qualified Data.Text                    as T
+import           Data.Text.IO                 as IO
+import           Text.ParserCombinators.ReadP
 
 input :: String -> IO [Text]
 input fileName = do
@@ -62,9 +62,9 @@ bintodecS bs = fst $ foldr (\b (acc, i) -> if b == '1' then (acc + 2^i, i+1) els
 oxygenRating :: [Text] ->  Int -> Text
 oxygenRating (x:[]) _ = x
 oxygenRating nbrs bitIdx =
-    let 
+    let
         mostCommons = map mostCommon $ cols (map (T.drop bitIdx) nbrs)
-        most = head $ mostCommons 
+        most = head $ mostCommons
         kept = (filter (\x -> T.singleton (T.index x bitIdx) == most) nbrs)
     in
         oxygenRating kept  (bitIdx+1)
@@ -73,9 +73,9 @@ oxygenRating nbrs bitIdx =
 c02Rating :: [Text] ->  Int -> Text
 c02Rating (x:[]) _ = x
 c02Rating nbrs bitIdx =
-    let 
+    let
         leastCommons = map leastCommon $ cols (map (T.drop bitIdx) nbrs)
-        least = head $ leastCommons 
+        least = head $ leastCommons
         kept = (filter (\x -> T.singleton (T.index x bitIdx) == least) nbrs)
     in
         c02Rating kept (bitIdx+1)

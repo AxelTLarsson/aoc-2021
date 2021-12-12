@@ -4,14 +4,14 @@ module Day4
     ( solve, bingo, unmarkedSum
     ) where
 
-import Control.Applicative
-import Text.ParserCombinators.ReadP
-import qualified Data.Text as T
-import Data.Text (Text)
-import Data.Text.IO as IO
-import Data.Text.Read as Read
-import Data.List (foldl', intersperse)
-import Data.Array
+import           Control.Applicative
+import           Data.Array
+import           Data.List                    (foldl', intersperse)
+import           Data.Text                    (Text)
+import qualified Data.Text                    as T
+import           Data.Text.IO                 as IO
+import           Data.Text.Read               as Read
+import           Text.ParserCombinators.ReadP
 
 input :: String -> IO Text
 input fileName = do
@@ -84,7 +84,7 @@ board b =
 
 transpose :: [[Text]] -> [[Text]]
 transpose ([]:_) = []
-transpose xs = (map head xs) : transpose (map tail xs)
+transpose xs     = (map head xs) : transpose (map tail xs)
 
 
 bingo :: [Text] -> Board -> Bool
