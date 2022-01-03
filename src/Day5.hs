@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ParallelListComp #-}
 
 module Day5
   ( solve,
@@ -24,9 +25,9 @@ solve :: IO ()
 solve = do
   inp <- (input "data/day5_input.txt")
   lineSegments <- return $ fmap parse (T.lines inp)
-  filteredLineSegments <- return $ filter verticalOrHorisontal lineSegments
-  coordinates <- return $ concatMap coordinatesFromLineSegment filteredLineSegments
-  print $ filteredLineSegments
+  filteredLineSegments <- return $ filter diagonal lineSegments
+  coordinates <- return $ concatMap coordinatesFromLineSegment lineSegments
+  print $ lineSegments
   vents <- return $ updateVents coordinates Map.empty
   overlaps <- return $ length $ Map.filter (> 1) vents
   print overlaps
@@ -77,12 +78,12 @@ updateVents (c : cs) m =
 updateVents [] m =
   m
 
-verticalOrHorisontal :: LineSegment -> Bool
-verticalOrHorisontal ((x1, y1), (x2, y2)) =
-  x1 == x2 || y1 == y2
+diagonal :: LineSegment -> Bool
+diagonal ((x1, y1), (x2, y2)) =
+  not (x1 == x2 || y1 == y2)
 
 coordinatesFromLineSegment :: LineSegment -> [Coordinate]
-coordinatesFromLineSegment ((x1, y1), (x2, y2)) =
+coordinatesFromLineSegment ls@(((x1, y1), (x2, y2))) =
   let xs =
         if x2 < x1
           then reverse [x2 .. x1]
@@ -91,4 +92,6 @@ coordinatesFromLineSegment ((x1, y1), (x2, y2)) =
         if y2 < y1
           then reverse [y2 .. y1]
           else [y1 .. y2]
-   in concat [[(x, y) | x <- xs] | y <- ys]
+   in if diagonal ls
+        then [(x, y) | x <- xs | y <- ys]
+        else concat [[(x, y) | x <- xs] | y <- ys]
